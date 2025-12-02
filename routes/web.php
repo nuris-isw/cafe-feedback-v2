@@ -2,10 +2,14 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FeedbackController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+
+// --- Route Pengunjung (Tidak Dilindungi) ---
+// Route untuk menampilkan form feedback (Alur 1)
+Route::get('/', [FeedbackController::class, 'create'])->name('feedback.create');
+// Route untuk memproses pengiriman feedback (Alur 2)
+Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
 
 Route::get('/dashboard', function () {
     return view('dashboard');

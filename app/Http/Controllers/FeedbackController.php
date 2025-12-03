@@ -5,9 +5,22 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Feedback;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class FeedbackController extends Controller
 {
+    /**
+     * Tampilkan daftar semua feedback kepada Admin di halaman dashboard.
+     */
+    public function index()
+    {
+        // Ambil semua feedback, diurutkan dari yang terbaru, menggunakan pagination
+        $feedbacks = Feedback::latest()->paginate(10); 
+
+        // Menggunakan view 'dashboard' yang sudah ada dari Breeze
+        return view('dashboard', compact('feedbacks'));
+    }
+
     /**
      * Tampilkan form feedback kepada pengunjung.
      */
@@ -56,6 +69,38 @@ class FeedbackController extends Controller
         return redirect()
             ->route('feedback.create')
             ->with('success', 'Terima kasih atas feedback Anda! Kami akan segera menindaklanjutinya.');
+    }
+
+    /**
+     * Tampilkan detail feedback tertentu.
+     */
+    public function show(Feedback $feedback) // Menggunakan Route Model Binding
+    {
+        return view('admin-feedback-detail', compact('feedback'));
+    }
+
+    /**
+     * Memproses respon Admin, update status, dan menyimpan data respon.
+     */
+    public function respond(Request $request, Feedback $feedback)
+    {
+        // 1. Validasi Respon
+        $validatedData = $request->validate([
+            'response_text' => 'required|string|max:500', // Sesuai batasan di view
+        ]);
+
+        // 2. Update Data Feedback (Alur 5)
+        $feedback->update([
+            'admin_response' => $validatedData['response_text'],
+            'status' => 'Responded', // Tandai sudah direspon
+            'responded_at' => Carbon::now(), // Catat waktu respon
+        ]);
+        
+        // 3. (Langkah 9: Logic Pengiriman Email akan masuk di sini)
+
+        // 4. Redirect kembali ke halaman detail dengan pesan sukses
+        return redirect()->route('dashboard')
+                         ->with('success', 'Respon berhasil dikirim. Status feedback telah diperbarui.');
     }
 
 }

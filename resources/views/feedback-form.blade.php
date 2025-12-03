@@ -40,7 +40,7 @@
             <div>
                 <label for="visitor_name" class="block text-sm font-medium text-stone-700">Nama Anda</label>
                 <input type="text" name="visitor_name" id="visitor_name" required value="{{ old('visitor_name') }}"
-                       class="mt-1 block w-full border-stone-300 rounded-lg shadow-sm focus:ring-amber-500 focus:border-amber-500 @error('visitor_name') border-red-500 @enderror"
+                       class="mt-1 block w-full border-stone-300 rounded-lg shadow-sm focus:ring-amber-500 focus:border-amber-500 @error('visitor_name') @enderror"
                        placeholder="Contoh: Risa Adelia">
                 @error('visitor_name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
             </div>
@@ -49,7 +49,7 @@
             <div>
                 <label for="visitor_email" class="block text-sm font-medium text-stone-700">Email (Untuk Respon)</label>
                 <input type="email" name="visitor_email" id="visitor_email" required value="{{ old('visitor_email') }}"
-                       class="mt-1 block w-full border-stone-300 rounded-lg shadow-sm focus:ring-amber-500 focus:border-amber-500 @error('visitor_email') border-red-500 @enderror"
+                       class="mt-1 block w-full border-stone-300 rounded-lg shadow-sm focus:ring-amber-500 focus:border-amber-500 @error('visitor_email') @enderror"
                        placeholder="email@anda.com">
                 @error('visitor_email')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
             </div>
@@ -88,7 +88,7 @@
             {{-- Ulasan/Komentar --}}
             <div>
                 <label for="comment" class="block text-sm font-medium text-stone-700">Ulasan & Saran</label>
-                <textarea name="comment" id="comment" rows="4" class="mt-1 block w-full border-stone-300 rounded-lg shadow-sm focus:ring-amber-500 focus:border-amber-500 @error('comment') border-red-500 @enderror"
+                <textarea name="comment" id="comment" rows="4" class="mt-1 block w-full border-stone-300 rounded-lg shadow-sm focus:ring-amber-500 focus:border-amber-500 @error('comment') @enderror"
                 placeholder="Bagikan pengalaman Anda tentang layanan atau menu... ">{{ old('comment') }}</textarea>
                 @error('comment')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
             </div>

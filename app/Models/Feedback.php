@@ -19,4 +19,8 @@ class Feedback extends Model
         'admin_response',
         'responded_at',
     ];
+
+    protected $casts = [
+        'responded_at' => 'datetime', // Beri tahu Laravel bahwa ini adalah objek tanggal/waktu (Carbon)
+    ];
 }

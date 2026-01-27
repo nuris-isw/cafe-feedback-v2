@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Feedback;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\FeedbackResponded;
 
 class FeedbackController extends Controller
 {
@@ -17,8 +19,16 @@ class FeedbackController extends Controller
         // Ambil semua feedback, diurutkan dari yang terbaru, menggunakan pagination
         $feedbacks = Feedback::latest()->paginate(10); 
 
+        // Hitung statistik sederhana
+        $stats = [
+            'total' => Feedback::count(),
+            'average_rating' => round(Feedback::avg('rating'), 1) ?: 0,
+            'pending' => Feedback::where('status', 'Pending')->count(),
+            'responded' => Feedback::where('status', 'Responded')->count(),
+        ];
+
         // Menggunakan view 'dashboard' yang sudah ada dari Breeze
-        return view('dashboard', compact('feedbacks'));
+        return view('dashboard', compact('feedbacks', 'stats'));
     }
 
     /**
@@ -96,11 +106,18 @@ class FeedbackController extends Controller
             'responded_at' => Carbon::now(), // Catat waktu respon
         ]);
         
-        // 3. (Langkah 9: Logic Pengiriman Email akan masuk di sini)
+        // --- LOGIK PENGIRIMAN EMAIL ---
+        try {
+            Mail::to($feedback->visitor_email)->send(new FeedbackResponded($feedback));
+        } catch (\Exception $e) {
+            // Jika email gagal, kita tetap redirect tapi dengan info tambahan
+            return redirect()->route('dashboard')
+                             ->with('success', 'Respon disimpan, namun email gagal dikirim.');
+        }
 
         // 4. Redirect kembali ke halaman detail dengan pesan sukses
         return redirect()->route('dashboard')
-                         ->with('success', 'Respon berhasil dikirim. Status feedback telah diperbarui.');
+                         ->with('success', 'Respon berhasil dikirim dan email notifikasi telah diteruskan ke pengunjung.');
     }
 
 }

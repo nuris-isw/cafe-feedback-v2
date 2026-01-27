@@ -7,6 +7,32 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                {{-- Total Feedback --}}
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
+                    <p class="text-sm font-medium text-gray-500 uppercase">Total Feedback</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $stats['total'] }}</p>
+                </div>
+
+                {{-- Rata-rata Rating --}}
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-amber-500">
+                    <p class="text-sm font-medium text-gray-500 uppercase">Rata-rata Rating</p>
+                    <p class="text-2xl font-bold text-gray-900">⭐ {{ $stats['average_rating'] }} / 5.0</p>
+                </div>
+
+                {{-- Masukan Pending --}}
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-red-500">
+                    <p class="text-sm font-medium text-gray-500 uppercase">Perlu Respon</p>
+                    <p class="text-2xl font-bold text-red-600">{{ $stats['pending'] }}</p>
+                </div>
+
+                {{-- Sudah Direspon --}}
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500">
+                    <p class="text-sm font-medium text-gray-500 uppercase">Selesai Direspon</p>
+                    <p class="text-2xl font-bold text-green-600">{{ $stats['responded'] }}</p>
+                </div>
+            </div>
+        
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <h3 class="text-lg font-medium mb-4 border-b pb-2">Daftar Semua Ulasan Masuk</h3>

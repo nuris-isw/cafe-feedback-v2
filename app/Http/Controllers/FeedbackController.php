@@ -106,18 +106,17 @@ class FeedbackController extends Controller
             'responded_at' => Carbon::now(), // Catat waktu respon
         ]);
         
-        // --- LOGIK PENGIRIMAN EMAIL ---
+        // Kirim Email via Gmail SMTP
         try {
             Mail::to($feedback->visitor_email)->send(new FeedbackResponded($feedback));
+            $msg = 'Respon berhasil dikirim dan email notifikasi telah diteruskan.';
         } catch (\Exception $e) {
-            // Jika email gagal, kita tetap redirect tapi dengan info tambahan
-            return redirect()->route('dashboard')
-                             ->with('success', 'Respon disimpan, namun email gagal dikirim.');
+            // Log error untuk pengecekan Admin
+            \Log::error("Gagal kirim email Gmail: " . $e->getMessage());
+            $msg = 'Respon disimpan di sistem, namun email gagal terkirim (Cek koneksi SMTP).';
         }
 
-        // 4. Redirect kembali ke halaman detail dengan pesan sukses
-        return redirect()->route('dashboard')
-                         ->with('success', 'Respon berhasil dikirim dan email notifikasi telah diteruskan ke pengunjung.');
+        return redirect()->route('dashboard')->with('success', $msg);
     }
 
 }

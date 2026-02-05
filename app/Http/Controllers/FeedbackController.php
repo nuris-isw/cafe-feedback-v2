@@ -10,6 +10,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\FeedbackResponded;
 use App\Mail\AdminNewFeedback;
+use App\Exports\FeedbackExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class FeedbackController extends Controller
 {
@@ -150,6 +152,17 @@ class FeedbackController extends Controller
         }
 
         return redirect()->route('dashboard')->with('success', $msg);
+    }
+
+    public function exportExcel(Request $request) 
+    {
+        // Mengambil filter yang sedang aktif
+        $filters = $request->only(['rating', 'category', 'status']);
+        
+        // Nama file dinamis
+        $fileName = 'Feedback_Anora_' . now()->format('Y-m-d_His') . '.xlsx';
+        
+        return Excel::download(new FeedbackExport($filters), $fileName);
     }
 
 }

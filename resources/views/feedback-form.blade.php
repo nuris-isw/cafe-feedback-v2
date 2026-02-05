@@ -65,11 +65,30 @@
                 @error('rating')<p class="text-xs text-red-500 mt-3 text-center font-medium">{{ $message }}</p>@enderror
             </div>
 
+            {{-- Kategori (Paling Berkesan) --}}
+            <div class="space-y-3">
+                <label class="block text-sm font-semibold text-stone-700">Apa yang paling berkesan dari kunjungan Anda?</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    @foreach(['Rasa', 'Pelayanan', 'Suasana', 'Kebersihan', 'Harga', 'Fasilitas'] as $cat)
+                        <label class="cursor-pointer">
+                            <input type="radio" name="category" value="{{ $cat }}" class="hidden peer" required @if(old('category') == $cat) checked @endif>
+                            <div class="text-center p-2 text-xs font-bold border rounded-lg transition-all 
+                                        border-stone-200 text-stone-600 bg-white
+                                        peer-checked:bg-amber-600 peer-checked:text-white peer-checked:border-amber-600
+                                        hover:border-amber-300">
+                                {{ $cat }}
+                            </div>
+                        </label>
+                    @endforeach
+                </div>
+                @error('category')<p class="text-xs text-red-500 mt-1 font-medium">{{ $message }}</p>@enderror
+            </div>
+
             {{-- Komentar --}}
             <div>
                 <label for="comment" class="block text-sm font-semibold text-stone-700 mb-1">Ulasan & Saran</label>
                 <textarea name="comment" id="comment" rows="3" class="w-full border-stone-300 rounded-lg shadow-sm focus:ring-amber-500 focus:border-amber-500 @error('comment') border-red-500 @enderror"
-                placeholder="Bagikan pengalaman Anda tentang layanan atau menu kami... ">{{ old('comment') }}</textarea>
+                placeholder="Ceritakan lebih lanjut tentang rasa menu, pelayanan, atau fasilitas kami...">{{ old('comment') }}</textarea>
                 @error('comment')<p class="text-xs text-red-500 mt-1 font-medium">{{ $message }}</p>@enderror
             </div>
 

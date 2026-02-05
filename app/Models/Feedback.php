@@ -13,6 +13,7 @@ class Feedback extends Model
         'visitor_name',
         'visitor_email',
         'rating',
+        'category',
         'comment',
         'photo_path',
         'status',

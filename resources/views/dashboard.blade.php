@@ -56,43 +56,97 @@
                 </div>
             </div>
 
-            {{-- FORM FILTER --}}
-            <div class="mb-6 p-4 bg-white rounded-xl shadow-sm border border-gray-100">
-                <form action="{{ route('dashboard') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1 tracking-wider">Filter Rating</label>
-                        <select name="rating" class="w-full border-gray-300 rounded-lg text-sm focus:ring-amber-500 focus:border-amber-500 shadow-sm">
-                            <option value="">Semua Rating</option>
-                            @for($i=5; $i>=1; $i--)
-                                <option value="{{ $i }}" {{ request('rating') == $i ? 'selected' : '' }}>⭐ {{ $i }} Bintang</option>
-                            @endfor
-                        </select>
+            {{-- FILTER CARD --}}
+            <div class="mb-6 bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                <form action="{{ route('dashboard') }}" method="GET" class="space-y-5">
+                    {{-- ROW 1 --}}
+                    <div class="grid gap-4 md:grid-cols-3">
+                        {{-- Rating --}}
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                                Filter Rating
+                            </label>
+
+                            <select name="rating"
+                                class="w-full rounded-xl border-gray-200 text-sm focus:ring-amber-500 focus:border-amber-500 shadow-sm">                                
+                                <option value="">Semua Rating</option>
+
+                                @for($i=5; $i>=1; $i--)
+                                    <option value="{{ $i }}" {{ request('rating') == $i ? 'selected' : '' }}>
+                                        ⭐ {{ $i }} Bintang
+                                    </option>
+                                @endfor
+                            </select>
+                        </div>
+
+                        {{-- Category --}}
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                                Kategori
+                            </label>
+
+                            <select name="category"
+                                class="w-full rounded-xl border-gray-200 text-sm focus:ring-amber-500 focus:border-amber-500 shadow-sm">
+                                
+                                <option value="">Semua Kategori</option>
+
+                                @foreach(['Rasa', 'Pelayanan', 'Suasana', 'Kebersihan', 'Harga', 'Fasilitas'] as $cat)
+                                    <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>
+                                        {{ $cat }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Status --}}
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                                Status
+                            </label>
+
+                            <select name="status"
+                                class="w-full rounded-xl border-gray-200 text-sm focus:ring-amber-500 focus:border-amber-500 shadow-sm">
+                                
+                                <option value="">Semua Status</option>
+                                <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>
+                                    Pending
+                                </option>
+                                <option value="Responded" {{ request('status') == 'Responded' ? 'selected' : '' }}>
+                                    Responded
+                                </option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1 tracking-wider">Kategori</label>
-                        <select name="category" class="w-full border-gray-300 rounded-lg text-sm focus:ring-amber-500 focus:border-amber-500 shadow-sm">
-                            <option value="">Semua Kategori</option>
-                            @foreach(['Rasa', 'Pelayanan', 'Suasana', 'Kebersihan', 'Harga', 'Fasilitas'] as $cat)
-                                <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                    {{-- ROW 2 — DATE RANGE --}}
+                    <div class="grid gap-4 md:grid-cols-4 items-end">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                                Mulai Tanggal
+                            </label>
+                            <input type="date"
+                                name="start_date"
+                                value="{{ request('start_date') }}"
+                                class="w-full rounded-xl border-gray-200 text-sm focus:ring-amber-500 focus:border-amber-500 shadow-sm">
+                        </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1 tracking-wider">Status</label>
-                        <select name="status" class="w-full border-gray-300 rounded-lg text-sm focus:ring-amber-500 focus:border-amber-500 shadow-sm">
-                            <option value="">Semua Status</option>
-                            <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="Responded" {{ request('status') == 'Responded' ? 'selected' : '' }}>Responded</option>
-                        </select>
-                    </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                                Sampai Tanggal
+                            </label>
+                            <input type="date"
+                                name="end_date"
+                                value="{{ request('end_date') }}"
+                                class="w-full rounded-xl border-gray-200 text-sm focus:ring-amber-500 focus:border-amber-500 shadow-sm">
+                        </div>
 
-                    <div class="flex gap-2">
-                        <button type="submit" class="flex-1 bg-amber-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-amber-700 transition shadow-sm">
+                        <button type="submit"
+                            class="bg-amber-600 text-white py-2.5 rounded-xl font-semibold text-sm hover:bg-amber-700 transition shadow-sm">
                             Terapkan Filter
                         </button>
-                        <a href="{{ route('dashboard') }}" class="flex-1 bg-gray-100 text-gray-600 px-4 py-2 rounded-lg font-bold text-sm text-center hover:bg-gray-200 transition border border-gray-200">
+
+                        <a href="{{ route('dashboard') }}"
+                            class="text-center bg-gray-100 text-gray-600 py-2.5 rounded-xl font-semibold text-sm hover:bg-gray-200 transition border border-gray-200">
                             Reset
                         </a>
                     </div>

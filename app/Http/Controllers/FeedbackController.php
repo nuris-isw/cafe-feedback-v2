@@ -12,6 +12,7 @@ use App\Mail\FeedbackResponded;
 use App\Mail\AdminNewFeedback;
 use App\Exports\FeedbackExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class FeedbackController extends Controller
 {
@@ -20,34 +21,40 @@ class FeedbackController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. Mulai Query
+        // 1. Mulai Query Dasar
         $query = Feedback::query();
 
-        // 2. Filter berdasarkan Rating
-        if ($request->has('rating') && $request->rating != '') {
+        // 2. Terapkan Filter (Gunakan filled() agar lebih ringkas)
+        if ($request->filled('rating')) {
             $query->where('rating', $request->rating);
         }
 
-        // 3. Filter berdasarkan Kategori
-        if ($request->has('category') && $request->category != '') {
+        if ($request->filled('category')) {
             $query->where('category', $request->category);
         }
 
-        // 4. Filter berdasarkan Status
-        if ($request->has('status') && $request->status != '') {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // 5. Eksekusi dengan Pagination (Tetap membawa parameter filter saat pindah halaman)
-        $feedbacks = $query->latest()->paginate(10)->withQueryString();
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('created_at', [
+                $request->start_date . ' 00:00:00', 
+                $request->end_date . ' 23:59:59'
+            ]);
+        }
 
-        // Statistik tetap mengambil data keseluruhan atau bisa juga disesuaikan dengan filter
+        // 3. Statistik Dinamis (Mengikuti Filter)
+        // Gunakan clone agar query statistik tidak merusak query utama untuk pagination
         $stats = [
-            'total' => Feedback::count(),
-            'average_rating' => round(Feedback::avg('rating'), 1) ?: 0,
-            'pending' => Feedback::where('status', 'Pending')->count(),
-            'responded' => Feedback::where('status', 'Responded')->count(),
+            'total' => (clone $query)->count(),
+            'average_rating' => round((clone $query)->avg('rating'), 1) ?: 0,
+            'pending' => (clone $query)->where('status', 'Pending')->count(),
+            'responded' => (clone $query)->where('status', 'Responded')->count(),
         ];
+
+        // 4. Eksekusi Query Utama untuk Tabel
+        $feedbacks = $query->latest()->paginate(10)->withQueryString();
 
         return view('dashboard', compact('feedbacks', 'stats'));
     }
@@ -163,6 +170,62 @@ class FeedbackController extends Controller
         $fileName = 'Feedback_Anora_' . now()->format('Y-m-d_His') . '.xlsx';
         
         return Excel::download(new FeedbackExport($filters), $fileName);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $filters = $request->only(['rating', 'category', 'status', 'start_date', 'end_date']);
+        
+        // 1. Inisialisasi Query Dasar
+        $query = Feedback::query();
+
+        // 2. Terapkan Filter (Termasuk Tanggal)
+        if (!empty($filters['rating'])) {
+            $query->where('rating', $filters['rating']);
+        }
+        if (!empty($filters['category'])) {
+            $query->where('category', $filters['category']);
+        }
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+        if (!empty($filters['start_date']) && !empty($filters['end_date'])) {
+            $query->whereBetween('created_at', [
+                $filters['start_date'] . ' 00:00:00', 
+                $filters['end_date'] . ' 23:59:59'
+            ]);
+        }
+
+        // 3. Data Utama untuk Tabel
+        $feedbacks = (clone $query)->latest()->get();
+
+        // 4. Statistik Global Dinamis (Mengikuti Filter)
+        $stats = [
+            'total'          => (clone $query)->count(),
+            'average_rating' => round((clone $query)->avg('rating'), 1) ?: 0,
+            'pending'        => (clone $query)->where('status', 'Pending')->count(),
+            'responded'      => (clone $query)->where('status', 'Responded')->count(),
+        ];
+
+        // 5. Statistik Per Kategori Dinamis
+        $categories = ['Rasa', 'Pelayanan', 'Suasana', 'Kebersihan', 'Harga', 'Fasilitas'];
+        $categoryStats = [];
+        foreach ($categories as $cat) {
+            $categoryStats[$cat] = round((clone $query)->where('category', $cat)->avg('rating'), 1) ?: 0;
+        }
+
+        // 6. Generate PDF
+        $pdf = Pdf::loadView('emails.pdf-report', [
+            'feedbacks'     => $feedbacks,
+            'stats'         => $stats,
+            'categoryStats' => $categoryStats,
+            'date'          => date('d F Y, H:i'),
+            'period'        => (!empty($filters['start_date'])) 
+                            ? $filters['start_date'] . ' s/d ' . $filters['end_date'] 
+                            : 'Semua Waktu',
+        ]);
+
+        return $pdf->setPaper('a4', 'landscape')->download('Laporan_Feedback_Anora.pdf');
     }
 
 }
